@@ -169,8 +169,13 @@ public class PseudowordGeneratorV2 {
 
                 double chance1 = (c1d.post[0][i] / total1) * ((accentMap[i] >= 0) ? accentMap[i] : 1);
                 double chance2 = (c2d.post[1][i] / total2) * ((accentMap[i] >= 0) ? accentMap[i] : 1);
+                
+                // if((accentMap[i] >= 0)){
+                //     System.out.println(i + "  [" + ((c1d.post[0][i] / total1) + "  " + (c2d.post[1][i] / total2)) + "]  [" + chance1 + "  " + chance2 + "]");
+                // }
 
-                if(!(chance1 == 0 || chance2 == 0))
+                                                    //hardcoding threshold
+                if(!(chance1 == 0 || chance2 == 0 || chance1 < 0.01 || chance2 < 0.01))
                     max += chance1 + chance2;
                 
                 // if(min != max)
@@ -184,15 +189,17 @@ public class PseudowordGeneratorV2 {
             //scale all ranges to 1
             //total range = max range of last character
             double downscale = adjusted[SAMPLE_CHARS_EX-1][1] / 1;
+            // System.out.println("downscale = " + downscale);
             for (int i = 0; i < SAMPLE_CHARS_EX; i++) {
                 adjusted[i][0] /= downscale;
+                adjusted[i][1] /= downscale;
             }
 
             return adjusted;
         }
     }
 
-    public static int RANDOM_LENGTH = -1;
+    public final static int RANDOM_LENGTH = (1 << 31);
 
     private long seed;
     private Random gen;
@@ -215,10 +222,21 @@ public class PseudowordGeneratorV2 {
             }
         }
 
+        boolean randLen = (maxLength & RANDOM_LENGTH) != 0;
+        int maxl = maxLength;
+        if(randLen)
+            maxl ^= RANDOM_LENGTH;
+        maxLength = maxl;
+
         for (int i = 0; i < count; i++) {
             String cur = root;
             
-            while (cur.length() <= maxLength) {
+            if(randLen)
+                maxLength = (int)(gen.nextDouble() * (maxl))+1;
+
+            System.out.println(maxLength);
+
+            while (cur.length() < maxLength) {
                 
                 char add = cgraph.nextChar(cur, gen.nextDouble(), accentMap);
                 cur += add;
@@ -236,15 +254,51 @@ public class PseudowordGeneratorV2 {
     public static void main(String[] args) throws Exception {
         PseudowordGeneratorV2 wg = new PseudowordGeneratorV2((int)(Math.random()* 1000));
 
+        
         Object[][] hints = new Object[][]{
-            {'t', 10.0},
-            {'\0', 0.1}
+            {'\0', 0.1},
+            {'z', 20.0}
         };
 
-        String[] res = wg.next("te", 1000, 15, hints);
+        String[] res = wg.next("pi", 1000, 5, hints);
 
         for (String s : res) {
             System.out.println(s);
         }
     }
 }
+
+/*
+ * 
+        Object[][] hints = new Object[][]{
+            {'\0', 0.1},
+            {'a', 0.0},
+            {'b', 0.0},
+            {'c', 0.0},
+            {'d', 0.0},
+            {'e', 1.0},
+            {'f', 0.0},
+            {'g', 0.0},
+            {'h', 1.0},
+            {'i', 1.0},
+            {'j', 0.0},
+            {'k', 0.0},
+            {'l', 1.0},
+            {'m', 0.0},
+            {'n', 0.0},
+            {'o', 0.0},
+            {'p', 1.0},
+            {'q', 0.0},
+            {'r', 0.0},
+            {'s', 0.0},
+            {'t', 0.0},
+            {'u', 0.0},
+            {'v', 0.0},
+            {'w', 0.0},
+            {'x', 10.0},
+            {'y', 1.0},
+            {'z', 0.0},
+        };
+ * 
+ * 
+ */
