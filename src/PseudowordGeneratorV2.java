@@ -233,9 +233,7 @@ public class PseudowordGeneratorV2 {
             
             if(randLen)
                 maxLength = (int)(gen.nextDouble() * (maxl))+1;
-
-            System.out.println(maxLength);
-
+                
             while (cur.length() < maxLength) {
                 
                 char add = cgraph.nextChar(cur, gen.nextDouble(), accentMap);
@@ -256,11 +254,14 @@ public class PseudowordGeneratorV2 {
 
         
         Object[][] hints = new Object[][]{
-            {'\0', 0.1},
-            {'z', 20.0}
+            // {'\0', 0.5},
+            // {'t', 5.0},
+            // {'e', 5.0},
+            // {'c', 5.0},
+            // {'h', 5.0},
         };
 
-        String[] res = wg.next("pi", 1000, 5, hints);
+        String[] res = wg.next("zoo", 1000, RANDOM_LENGTH | 8, hints);
 
         for (String s : res) {
             System.out.println(s);
